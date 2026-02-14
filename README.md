@@ -249,7 +249,7 @@ python embeddings.py        #Run once to create the index
 uvicorn main:app --reload
 ```
 
-##Frontend
+## Frontend
 ```bash
 cd frontend-angular
 ```
