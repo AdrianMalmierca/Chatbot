@@ -1,0 +1,33 @@
+# macOS
+.DS_Store
+
+# IDEs
+.idea/
+
+es/upsa/tfg/faiss_index.bin
+es/upsa/tfg/faiss_index.index
+es/upsa/tfg/vector_index.faiss
+es/upsa/tfg/vector_docs.json
+
+
+# Node/Angular
+node_modules/
+dist/
+*.log
+
+# Python
+__pycache__/
+*.pyc
+*.pkl
+*.npy
+
+# Environment files (secrets)
+env/
+.env
+
+# Optional
+*.sqlite
+*.db
+
+frontend/.git
+

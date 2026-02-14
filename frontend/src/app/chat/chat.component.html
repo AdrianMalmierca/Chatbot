@@ -1,0 +1,21 @@
+<div class="chat-container">
+  <h2>Asistente Académico</h2>
+
+  <div class="chat-box">
+    <div *ngFor="let msg of messages" [class.user]="msg.sender === 'user'" class="message">
+      <div class="bubble">{{ msg.text }}</div>
+    </div>
+    @if (loading) {
+      <div class="message bot"><div class="bubble">Escribiendo...</div></div>
+    }
+  </div>
+
+  <div class="input-area">
+    <textarea [(ngModel)]="question" rows="2" placeholder="Escribe tu pregunta..."></textarea>
+    <button (click)="send()" [disabled]="loading">Enviar</button>
+  </div>
+
+  @if (error) {
+    <div class="error">{{ error }}</div>
+  }
+</div>
