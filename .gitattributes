@@ -1,4 +1,0 @@
-es/upsa/tfg/faiss_index.bin filter=lfs diff=lfs merge=lfs -text
-es/upsa/tfg/faiss_index.index filter=lfs diff=lfs merge=lfs -text
-es/upsa/tfg/vector_index.faiss filter=lfs diff=lfs merge=lfs -text
-es/upsa/tfg/vector_docs.json filter=lfs diff=lfs merge=lfs -text
