@@ -7,10 +7,10 @@ https://portalcientifico.upsa.es/
 
 The website was crawled using Apache Nutch, generating a dump that was later transformed and cleaned into a structured JSON format suitable for semantic indexing and retrieval.
 
-# Before start
+## Before start
 The files faiss_index.bin, doc_metadata.pkl, embeddings.npy and doc_metadata.pkl are generated when the Main.py and Embeddings.py code is executed. These are very large files, so they are not uploaded to the repository, but they are vital for the chatbot to function.
 
-## Theoretical background: RAG (Retrieval-Augmented Generation)
+### Theoretical background: RAG (Retrieval-Augmented Generation)
 Retrieval-Augmented Generation (RAG) is an advanced NLP architecture that combines retrieval-based methods with generative language models. It was introduced to address the limitation of pure language models: they can generate fluent text but often hallucinate or produce inaccurate information if the knowledge is not embedded in their parameters.
 
 The RAG paradigm separates the task into two complementary stages:
@@ -33,7 +33,7 @@ The RAG paradigm separates the task into two complementary stages:
         - “Integrate document content naturally into paragraphs.”
         - “List authors or collaborations only if present in the documents.”
 
-## Methodological justification
+### Methodological justification
 1. Why RAG for Academic Assistance?
     - Dynamic Knowledge Base
     - Academic research grows rapidly. Pre-trained LLMs alone may be outdated.
@@ -61,14 +61,14 @@ The RAG paradigm separates the task into two complementary stages:
     - The system can reference which documents were used to generate each response.
     - This increases trustworthiness and allows verification of sources.
 
-# Structure
+## Structure
 Angular Frontend
         ↓
 FastAPI Backend
         ↓
 RAG Engine (FAISS + OpenAI Embeddings + GPT-4)
 
-# Main components
+## Main components
 - Frontend: Angular (chat-based UI)
 - Backend: FastAPI (REST API)
 - Vector Store: FAISS
@@ -95,7 +95,7 @@ project/
 └── data/
     └── output_clean3.json
 
-# Data pipeline
+## Data pipeline
 1. Data Extraction
 2. The scientific portal was crawled using Apache Nutch.
 3. The generated dump was cleaned and transformed into a structured JSON file.
@@ -119,10 +119,10 @@ Example structure:
   "type_of_publication": "..."
 }
 
-# Embedding generation
+## Embedding generation
 Script: embeddings.py
 
-## Process:
+### Process:
 1. Load cleaned JSON documents.
 2. Build a textual representation combining:
     - Title
@@ -142,16 +142,16 @@ Run:
 python embeddings.py
 ```
 
-# RAG engine
+## RAG engine
 Core file: Ai.py
 
-## Retrieval phase
+### Retrieval phase
 1. User submits a query.
 2. The query is embedded.
 3. FAISS performs similarity search.
 4. Most relevant documents are selected.
 
-## Context construction
+### Context construction
 The system builds a structured context including:
 - Title
 - Authors
@@ -161,7 +161,7 @@ The system builds a structured context including:
 - Summary
 The context is token-limited to prevent overflow.
 
-## Generation phase
+### Generation phase
 The context is sent to gpt-4-turbo with strict instructions:
 - Answer only using provided documents.
 - Do not hallucinate information.
@@ -169,7 +169,7 @@ The context is sent to gpt-4-turbo with strict instructions:
 - Avoid bullet points and metadata formatting.
 - Explicitly state when information is unavailable.
 
-# Token management
+## Token management
 To avoid exceeding model limits:
 - Maximum context: 18,000 tokens
 - Conversation history is dynamically trimmed
@@ -177,7 +177,7 @@ To avoid exceeding model limits:
 - Old messages are removed when necessary
 This ensures stable multi-turn conversations.
 
-# Backend – FastAPI
+## Backend – FastAPI
 File: Main.py
 Exposes endpoint:
 POST /chat
@@ -199,9 +199,9 @@ Run backend:
 uvicorn main:app --reload --port 8000
 ```
 
-# Frontend – Angular
+## Frontend – Angular
 
-## ChatComponent
+### ChatComponent
 Features:
 - Real-time chat interface
 - Message history
@@ -209,7 +209,7 @@ Features:
 - Error handling
 - Unique session ID per session
 
-## ChatService
+### ChatService
 Sends requests to:
 http://localhost:8000/chat
 
@@ -227,7 +227,7 @@ ng serve
 Access:
 http://localhost:4200
 
-# System capabilities
+## System capabilities
 The assistant can:
 - Retrieve publications by topic
 - List all publications of a specific author
@@ -237,8 +237,8 @@ The assistant can:
 - Explicitly state when data is insufficient
 The model is explicitly instructed to rely exclusively on retrieved documents.
 
-# Running the full system
-## Backend
+## Running the full system
+### Backend
 ```bash
 cd backend
 ```
@@ -249,7 +249,7 @@ python embeddings.py        #Run once to create the index
 uvicorn main:app --reload
 ```
 
-## Frontend
+### Frontend
 ```bash
 cd frontend-angular
 ```
@@ -260,7 +260,7 @@ ng serve
 Open:
 http://localhost:4200
 
-# Future improvements
+## Future improvements
 1. Persistent user sessions
 2. Semantic re-ranking
 3. Filtering by year or publication type
@@ -270,7 +270,7 @@ http://localhost:4200
 7. API key management via secure vault
 8. Improved author disambiguation
 
-# Technology stack
+## Technology stack
 1. Angular
 2. TypeScript
 3. FastAPI
@@ -280,3 +280,8 @@ http://localhost:4200
 7. NumPy
 8. Pickle
 9. Apache Nutch
+
+## Author
+Adrián Martín Malmierca
+
+Computer Engineer & Mobile Applications Master's Student
