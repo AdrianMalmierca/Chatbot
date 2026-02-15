@@ -238,21 +238,37 @@ The assistant can:
 The model is explicitly instructed to rely exclusively on retrieved documents.
 
 ## Running the full system
+
+1. Clone the repository
+git clone https://github.com/AdrianMalmierca/Chatbot
+
 ### Backend
+2. Access to the root
 ```bash
-cd backend
+cd Chatbot
 ```
+3. Run once to create the index
 ```bash
-python embeddings.py        #Run once to create the index
+python embeddings.py        
 ```
+4. Starts a local server using Uvicorn, an ASGI web server for Python.
+
+Loads the app object from the main.py file, which contains the FastAPI application instance.
+
+Runs the server on http://127.0.0.1:8000 by default.
+
+Enables auto-reload (--reload) so that the server automatically restarts whenever you modify your code.
 ```bash
 uvicorn main:app --reload
 ```
 
 ### Frontend
+2. Access to the frontend
 ```bash
-cd frontend-angular
+cd frontend
 ```
+
+3. Run the Angular code
 ```bash
 ng serve
 ```
