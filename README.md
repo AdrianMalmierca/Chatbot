@@ -297,6 +297,9 @@ http://localhost:4200
 8. Pickle
 9. Apache Nutch
 
+# What did I learn?
+This project has been a completely challenge cause it's the first time I have done something with AI. Previously I have learned Python but mmore basic knowledge, like some operations or charts. But with this project first of all I have learned how to obtain all the information from a web page, cause before I heard about crawler but I had never done something related. I also have learned how tu use APIs for this type of projects and also what's the logic that the chatbot follows. I have learned to create better prompts so the chatbot could answer better and also why are important the embeddings and how they work. Finally I have learned to connect backend and frontend in different codes cause has been the first time I have done something like that. Although this project has taken a lot of time, Im so grateful with the result.
+
 ## Author
 Adrián Martín Malmierca
 
