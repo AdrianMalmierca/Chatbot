@@ -75,25 +75,29 @@ RAG Engine (FAISS + OpenAI Embeddings + GPT-4)
 - Embeddings Model: text-embedding-3-small
 - LLM: gpt-4-turbo
 - Data Source: Scientific portal (crawled and transformed into JSON)
-
-project/
+```
+Chatbot/
 │
-├── frontend-angular/
-│   ├── chat.component.ts
-│   ├── chat.component.html
-│   ├── chat.component.css
-│   └── chat.service.ts
+├── frontend/
+│       ├── src/
+│           ├── app/
+│               ├── chat.component.ts
+│               ├── chat.component.html
+│               ├── chat.component.css
+│               ├── services/
+│                       └── chat.service.ts
 │
-├── backend/
-│   ├── main.py
-│   ├── ai.py
-│   ├── embeddings.py
-│   ├── faiss_index.bin
-│   ├── doc_metadata.pkl
-│   └── embeddings.npy
-│
-└── data/
-    └── output_clean3.json
+|──es/
+|   ├──upsa/
+|        ├──tfg/
+│            ├── main.py
+│            ├── ai.py
+│            ├── embeddings.py
+│            ├── faiss_index.bin
+│            ├── doc_metadata.pkl
+│            ├── embeddings.npy
+|            └──output_clean3.json
+````
 
 ## Data pipeline
 1. Data Extraction
