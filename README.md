@@ -242,17 +242,20 @@ The assistant can:
 The model is explicitly instructed to rely exclusively on retrieved documents.
 
 ## Running the full system
-
 1. Clone the repository
-git clone https://github.com/AdrianMalmierca/Chatbot
+```bash
+git clone https://github.com/AdrianMalmierca/Api-with-testing
+```
 
 ### Backend
 2. Access to the root
 ```bash
 cd Chatbot
 ```
+
 3. Run once to create the index
 ```bash
+
 python embeddings.py        
 ```
 4. Starts a local server using Uvicorn, an ASGI web server for Python.
