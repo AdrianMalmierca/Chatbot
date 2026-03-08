@@ -280,6 +280,10 @@ ng serve
 Open:
 http://localhost:4200
 
+## Execution
+Here you can see a small execution of the chatbot, where you ask which teacher work with AI, and they say the names and some articles where they appeared.
+![Chatbot](assets/chatbot.png)
+
 ## Future improvements
 1. Persistent user sessions
 2. Semantic re-ranking
