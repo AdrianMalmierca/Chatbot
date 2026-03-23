@@ -12,12 +12,6 @@ A full Retrieval-Augmented Generation (RAG) system that allows users to query ac
 
 ---
 
-## Live Demo
-
-> Source data: [portalcientifico.upsa.es](https://portalcientifico.upsa.es)
-
----
-
 ## Problem Statement
 
 Academic institutions generate large volumes of research publications that are difficult to search with traditional keyword queries. Researchers and students need a way to ask natural-language questions like *"Which authors work in artificial intelligence?"* or *"What publications has Dr. X co-authored?"* and get grounded, accurate answers — not hallucinated responses.
