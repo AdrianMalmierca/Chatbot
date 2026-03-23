@@ -1,118 +1,95 @@
-# Chatbot
-This project implements a full Retrieval-Augmented Generation (RAG) system that allows users to query academic publication data extracted from the scientific portal of the Universidad Pontificia de Salamanca.
+# RAG Chatbot — Academic Publications Assistant
 
-The source data was obtained from:
+![Python](https://img.shields.io/badge/Python-3.11-3776AB?style=flat-square&logo=python)
+![FastAPI](https://img.shields.io/badge/FastAPI-0.110-009688?style=flat-square&logo=fastapi)
+![Angular](https://img.shields.io/badge/Angular-17-DD0031?style=flat-square&logo=angular)
+![TypeScript](https://img.shields.io/badge/TypeScript-5-blue?style=flat-square&logo=typescript)
+![OpenAI](https://img.shields.io/badge/OpenAI-GPT--4-412991?style=flat-square&logo=openai)
+![FAISS](https://img.shields.io/badge/FAISS-vector--search-FF6B35?style=flat-square)
+![Apache Nutch](https://img.shields.io/badge/Apache_Nutch-crawler-D22128?style=flat-square&logo=apache)
 
-https://portalcientifico.upsa.es/
+A full Retrieval-Augmented Generation (RAG) system that allows users to query academic publications from the scientific portal of the Universidad Pontificia de Salamanca. The data was extracted via web crawling with Apache Nutch, semantically indexed with FAISS and OpenAI embeddings, and served through a FastAPI backend with an Angular chat interface.
 
-The website was crawled using Apache Nutch, generating a dump that was later transformed and cleaned into a structured JSON format suitable for semantic indexing and retrieval.
+---
 
-## Before start
-The files faiss_index.bin, doc_metadata.pkl, embeddings.npy and doc_metadata.pkl are generated when the Main.py and Embeddings.py code is executed. These are very large files, so they are not uploaded to the repository, but they are vital for the chatbot to function.
+## Live Demo
 
-### Theoretical background: RAG (Retrieval-Augmented Generation)
-Retrieval-Augmented Generation (RAG) is an advanced NLP architecture that combines retrieval-based methods with generative language models. It was introduced to address the limitation of pure language models: they can generate fluent text but often hallucinate or produce inaccurate information if the knowledge is not embedded in their parameters.
+> Source data: [portalcientifico.upsa.es](https://portalcientifico.upsa.es)
 
-The RAG paradigm separates the task into two complementary stages:
-1. Retrieval Stage
-    - Given a user query, the system retrieves the most relevant documents from a large corpus.
-    - This is usually done via vector similarity search:
-        - Documents are encoded into high-dimensional embeddings (numerical representations of semantic content).
-        - The query is encoded using the same embedding model.
-        - Similarity metrics (e.g., cosine similarity or L2 distance) identify documents closest in semantic space to the query.
+---
 
-    - Advantages:
-        - Keeps knowledge up-to-date without retraining the language model.
-        - Reduces hallucinations by grounding answers in real data.
+## Problem Statement
 
-2. Generation Stage
-    - The retrieved documents are provided as context to a large language model (LLM), which generates a natural-language answer.
-    - The model is instructed to rely strictly on the provided context.
-    - Prompts often include rules like:
-        - “Do not invent information.”
-        - “Integrate document content naturally into paragraphs.”
-        - “List authors or collaborations only if present in the documents.”
+Academic institutions generate large volumes of research publications that are difficult to search with traditional keyword queries. Researchers and students need a way to ask natural-language questions like *"Which authors work in artificial intelligence?"* or *"What publications has Dr. X co-authored?"* and get grounded, accurate answers — not hallucinated responses.
 
-### Methodological justification
-1. Why RAG for Academic Assistance?
-    - Dynamic Knowledge Base
-    - Academic research grows rapidly. Pre-trained LLMs alone may be outdated.
-    - Using a retrieval system, the assistant can access the most recent publications without retraining the model.
+This system solves that by combining semantic vector search with a large language model, ensuring answers are always grounded in real retrieved documents from the institution's own scientific portal.
 
-2. Handling Large Document Sets
-    - Scientific portals contain thousands of publications.
-    - Embeddings + FAISS allow efficient similarity search across large corpora, ensuring fast retrieval.
+---
 
-3. Precision over Fluency
-    - Classical LLMs excel in fluency but may hallucinate factual details.
-    - By grounding responses in retrieved articles, RAG improves factual correctness, which is crucial for academic use.
+## Screenshot
 
-4. Scalability and Modularity
-    - Retrieval and generation stages are decoupled.
-    - Corpus can be updated independently of the LLM.
-    - The embedding model and similarity metric can be swapped for improved performance.
+### Chatbot in action
+Asking which teachers work with AI — the system retrieves relevant publications and generates a natural language response with author names and article references.
 
-5. Token Management & Multi-turn Conversations
-    - Academic queries can be lengthy.
-    - Limiting context tokens ensures that relevant information fits the LLM input window.
-    - Conversation history can be truncated intelligently to retain continuity without exceeding model limits.
+![Chatbot](assets/chatbot.png)
 
-6. Explainability
-    - The system can reference which documents were used to generate each response.
-    - This increases trustworthiness and allows verification of sources.
+---
 
-## Structure
-Angular Frontend
-        ↓
-FastAPI Backend
-        ↓
-RAG Engine (FAISS + OpenAI Embeddings + GPT-4)
+## How It Works
 
-## Main components
-- Frontend: Angular (chat-based UI)
-- Backend: FastAPI (REST API)
-- Vector Store: FAISS
-- Embeddings Model: text-embedding-3-small
-- LLM: gpt-4-turbo
-- Data Source: Scientific portal (crawled and transformed into JSON)
 ```
-Chatbot/
-│
-├── frontend/
-│       ├── src/
-│           ├── app/
-│               ├── chat.component.ts
-│               ├── chat.component.html
-│               ├── chat.component.css
-│               ├── services/
-│                       └── chat.service.ts
-│
-|──es/
-|   ├──upsa/
-|        ├──tfg/
-│            ├── main.py
-│            ├── ai.py
-│            ├── embeddings.py
-│            ├── faiss_index.bin
-│            ├── doc_metadata.pkl
-│            ├── embeddings.npy
-|            └──output_clean3.json
-````
+User Query
+    ↓
+Angular Frontend (chat UI)
+    ↓
+FastAPI Backend (POST /chat)
+    ↓
+RAG Engine
+    ├── Query → Embedding (text-embedding-3-small)
+    ├── FAISS similarity search → Top-K documents
+    └── Context + Query → GPT-4 Turbo → Natural language answer
+    ↓
+Response rendered in chat
+```
 
-## Data pipeline
-1. Data Extraction
-2. The scientific portal was crawled using Apache Nutch.
-3. The generated dump was cleaned and transformed into a structured JSON file.
-4. Each document contains:
-    - Title
-    - Authors
-    - Abstract / Summary
-    - Year of publication
-    - ISBN/ISSN
-    - Conference
-    - Type of publication
+### Retrieval Stage
+The user's query is converted into a high-dimensional vector using the same embedding model used to index the documents. FAISS performs a similarity search (L2 distance) across the full corpus and returns the most semantically relevant publications.
 
-Example structure:
+### Generation Stage
+The retrieved documents are injected as context into a GPT-4 Turbo prompt with strict instructions: answer only using the provided documents, write in natural narrative language, and explicitly state when information is unavailable.
+
+---
+
+## Features
+
+- **Natural language queries** over a corpus of academic publications
+- **Semantic search** — finds relevant documents even without exact keyword matches
+- **Hallucination prevention** — the model is instructed to rely exclusively on retrieved documents
+- **Multi-turn conversations** with dynamic token management to stay within model limits
+- **Real-time chat interface** with loading indicators and error handling
+- **Source-grounded answers** — responses reference which documents were used
+
+---
+
+## Data Pipeline
+
+```
+Apache Nutch crawler
+        ↓
+Raw HTML dump
+        ↓
+Cleaning & transformation (Python)
+        ↓
+Structured JSON (output_clean3.json)
+        ↓
+Embedding generation (embeddings.py)
+        ↓
+FAISS index + metadata store
+```
+
+Each document in the JSON contains:
+
+```json
 {
   "title": "...",
   "authors": ["Author1", "Author2"],
@@ -122,196 +99,170 @@ Example structure:
   "congress": "...",
   "type_of_publication": "..."
 }
-
-## Embedding generation
-Script: embeddings.py
-
-### Process:
-1. Load cleaned JSON documents.
-2. Build a textual representation combining:
-    - Title
-    - Summary
-    - Authors
-3. Generate embeddings using:
-    text-embedding-3-small
-
-4. Store vectors in a FAISS index (IndexFlatL2).
-5. Persist:
-    - faiss_index.bin
-    - doc_metadata.pkl
-    - embeddings.npy
-
-Run:
-```bash
-python embeddings.py
 ```
 
-## RAG engine
-Core file: Ai.py
+---
 
-### Retrieval phase
-1. User submits a query.
-2. The query is embedded.
-3. FAISS performs similarity search.
-4. Most relevant documents are selected.
+## Tech Stack
 
-### Context construction
-The system builds a structured context including:
-- Title
-- Authors
-- Year
-- Conference
-- Publication type
-- Summary
-The context is token-limited to prevent overflow.
+| Layer | Technology | Reason |
+|-------|-----------|--------|
+| Frontend | Angular 17 | Component-based chat UI with reactive services |
+| Language (frontend) | TypeScript | Type safety, Angular native |
+| Backend | FastAPI | Async Python API, minimal overhead |
+| LLM | GPT-4 Turbo | Best-in-class generation quality |
+| Embeddings | text-embedding-3-small | Efficient, high-quality semantic vectors |
+| Vector store | FAISS (IndexFlatL2) | Fast similarity search over large corpora |
+| Data extraction | Apache Nutch | Scalable web crawler for the scientific portal |
+| Data processing | Python + NumPy | Embedding generation and index persistence |
 
-### Generation phase
-The context is sent to gpt-4-turbo with strict instructions:
-- Answer only using provided documents.
-- Do not hallucinate information.
-- Write in natural narrative language.
-- Avoid bullet points and metadata formatting.
-- Explicitly state when information is unavailable.
+---
 
-## Token management
-To avoid exceeding model limits:
-- Maximum context: 18,000 tokens
-- Conversation history is dynamically trimmed
-- System instructions are preserved
-- Old messages are removed when necessary
-This ensures stable multi-turn conversations.
+## Project Structure
 
-## Backend – FastAPI
-File: Main.py
-Exposes endpoint:
-POST /chat
+```
+Chatbot/
+├── frontend/
+│   └── src/app/
+│       ├── chat.component.ts      # Chat UI logic
+│       ├── chat.component.html    # Chat template
+│       ├── chat.component.css     # Styles
+│       └── services/
+│           └── chat.service.ts    # HTTP service → FastAPI
+└── es/upsa/tfg/
+    ├── main.py                    # FastAPI app — POST /chat
+    ├── ai.py                      # RAG engine (retrieval + generation)
+    ├── embeddings.py              # Embedding generation + FAISS indexing
+    ├── output_clean3.json         # Cleaned publication data
+    ├── faiss_index.bin            # FAISS index (generated, not in repo)
+    ├── doc_metadata.pkl           # Document metadata (generated, not in repo)
+    └── embeddings.npy             # Stored vectors (generated, not in repo)
+```
 
-Example request:
+> **Note:** `faiss_index.bin`, `doc_metadata.pkl`, and `embeddings.npy` are generated locally by running `embeddings.py`. They are too large to commit to the repository.
+
+---
+
+## Token Management
+
+To avoid exceeding model context limits:
+- Maximum context window: **18,000 tokens**
+- Conversation history is dynamically trimmed — oldest messages removed first
+- System instructions are always preserved
+- This ensures stable multi-turn conversations even on long sessions
+
+---
+
+## API
+
+### `POST /chat`
+
+**Request:**
+```json
 {
   "text": "Which authors work in artificial intelligence?"
 }
+```
 
-Example response:
+**Response:**
+```json
 {
-  "response": "..."
+  "response": "Several researchers at UPSA work in the field of artificial intelligence..."
 }
+```
 
-CORS is enabled for Angular integration.
+CORS is enabled for Angular integration on `localhost:4200`.
 
-Run backend:
+---
+
+## Running Locally
+
+### Prerequisites
+- Python 3.11+
+- Node.js 18+ and Angular CLI
+- OpenAI API key
+
+### Backend
+
 ```bash
+# Clone the repository
+git clone https://github.com/AdrianMalmierca/chatbot-rag
+cd Chatbot/es/upsa/tfg
+
+# Install Python dependencies
+pip install fastapi uvicorn openai faiss-cpu numpy
+
+# Generate the FAISS index (run once)
+python embeddings.py
+
+# Start the backend
 uvicorn main:app --reload --port 8000
 ```
 
-## Frontend – Angular
-
-### ChatComponent
-Features:
-- Real-time chat interface
-- Message history
-- Loading indicator
-- Error handling
-- Unique session ID per session
-
-### ChatService
-Sends requests to:
-http://localhost:8000/chat
-
-Payload:
-{
-  "question": "...",
-  "session_id": "uuid"
-}
-
-Run frontend:
-```bash
-ng serve
-```
-
-Access:
-http://localhost:4200
-
-## System capabilities
-The assistant can:
-- Retrieve publications by topic
-- List all publications of a specific author
-- Identify co-authorship relationships
-- Count researchers working in a given area
-- Confirm collaborations between two authors
-- Explicitly state when data is insufficient
-The model is explicitly instructed to rely exclusively on retrieved documents.
-
-## Running the full system
-1. Clone the repository
-```bash
-git clone https://github.com/AdrianMalmierca/Api-with-testing
-```
-
-### Backend
-2. Access to the root
-```bash
-cd Chatbot
-```
-
-3. Run once to create the index
-```bash
-
-python embeddings.py        
-```
-4. Starts a local server using Uvicorn, an ASGI web server for Python.
-
-Loads the app object from the main.py file, which contains the FastAPI application instance.
-
-Runs the server on http://127.0.0.1:8000 by default.
-
-Enables auto-reload (--reload) so that the server automatically restarts whenever you modify your code.
-```bash
-uvicorn main:app --reload
-```
-
 ### Frontend
-2. Access to the frontend
-```bash
-cd frontend
-```
 
-3. Run the Angular code
 ```bash
+cd Chatbot/frontend
+
+# Install dependencies
+npm install
+
+# Start the Angular dev server
 ng serve
 ```
 
-Open:
-http://localhost:4200
+Open [http://localhost:4200](http://localhost:4200).
 
-## Execution
-Here you can see a small execution of the chatbot, where you ask which teacher work with AI, and they say the names and some articles where they appeared.
-![Chatbot](assets/chatbot.png)
+---
 
-## Future improvements
-1. Persistent user sessions
-2. Semantic re-ranking
-3. Filtering by year or publication type
-4. Authentication system
-5. Dockerized deployment
-6. Replace FAISS with managed vector DB (Pinecone, Weaviate, etc.)
-7. API key management via secure vault
-8. Improved author disambiguation
+## System Capabilities
 
-## Technology stack
-1. Angular
-2. TypeScript
-3. FastAPI
-4. Python
-5. FAISS
-6. OpenAI API
-7. NumPy
-8. Pickle
-9. Apache Nutch
+The assistant can:
+- Retrieve publications by research topic
+- List all publications by a specific author
+- Identify co-authorship relationships between researchers
+- Count researchers working in a given area
+- Confirm whether two authors have collaborated
+- Explicitly state when the requested information is not in the corpus
 
-# What did I learn?
-This project has been a completely challenge cause it's the first time I have done something with AI. Previously I have learned Python but mmore basic knowledge, like some operations or charts. But with this project first of all I have learned how to obtain all the information from a web page, cause before I heard about crawler but I had never done something related. I also have learned how tu use APIs for this type of projects and also what's the logic that the chatbot follows. I have learned to create better prompts so the chatbot could answer better and also why are important the embeddings and how they work. Finally I have learned to connect backend and frontend in different codes cause has been the first time I have done something like that. Although this project has taken a lot of time, Im so grateful with the result.
+---
+
+## Future Improvements
+
+- **Persistent user sessions** — store conversation history server-side
+- **Semantic re-ranking** — apply a cross-encoder to re-rank retrieved documents before generation
+- **Metadata filtering** — filter by year, publication type, or research area before retrieval
+- **Dockerized deployment** — containerize both frontend and backend
+- **Managed vector database** — replace FAISS with Pinecone or Weaviate for production scale
+- **Authentication system** — user accounts with query history
+- **Author disambiguation** — handle authors with similar names in the corpus
+
+---
+
+## What I Learned Building This
+
+**RAG architecture end-to-end** — this was my first AI project, and building it from scratch taught me how retrieval and generation work together. The key insight: the quality of the answer depends more on retrieval quality than on the LLM itself — garbage in, garbage out.
+
+**Web crawling at scale** — using Apache Nutch to extract data from a real institution's portal was my first experience with crawlers. Understanding the full pipeline from raw HTML dump to clean structured JSON gave me a practical understanding of data engineering.
+
+**Prompt engineering** — writing effective system prompts that prevent hallucination while maintaining natural language output required significant iteration. Constraints like "do not invent information" and "explicitly state when data is unavailable" turned out to be critical.
+
+**Embeddings and vector search** — understanding why semantic search outperforms keyword search, how FAISS indexes vectors for fast retrieval, and how the choice of embedding model affects result quality was a foundational learning in applied ML.
+
+**Full-stack integration across different stacks** — connecting an Angular frontend to a Python FastAPI backend across different runtimes was a first for me. Managing CORS, request/response contracts, and session IDs across the boundary taught me a lot about how full-stack systems actually communicate.
+
+**Token budget management** — LLMs have hard context limits. Building a dynamic trimming strategy that preserves system instructions while discarding old history was a practical introduction to the constraints of working with production LLM APIs.
+
+---
+
+## License
+
+MIT — free to use, modify, and deploy.
+
+---
 
 ## Author
-Adrián Martín Malmierca
 
-Computer Engineer & Mobile Applications Master's Student
+**Adrián Martín Malmierca**  
+Computer Engineer & Mobile Applications Master's Student  
+[GitHub](https://github.com/AdrianMalmierca) · [LinkedIn](https://www.linkedin.com/in/adri%C3%A1n-mart%C3%ADn-malmierca-4aa6b0293/)
