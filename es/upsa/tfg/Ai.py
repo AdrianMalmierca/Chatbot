@@ -4,37 +4,40 @@ import pickle
 from openai import OpenAI
 import re
 import tiktoken
+import os
 
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
-INDEX_PATH = "/Users/administrador/Documents/Phyton/RagLlmTodo/es/upsa/tfg/faiss_index.bin"
-DOCS_PATH = "/Users/administrador/Documents/Phyton/RagLlmTodo/es/upsa/tfg/doc_metadata.pkl"
+INDEX_PATH = "/Users/administrador/Documents/Profesional/proyectos/RagLlmTodo/es/upsa/tfg/faiss_index.bin"
+DOCS_PATH = "/Users/administrador/Documents/Profesional/proyectos/RagLlmTodo/es/upsa/tfg/doc_metadata.pkl"
 MAX_TOKENS_CONTEXT = 18000
-MAX_TOKENS_HISTORIAL = 32000 - MAX_TOKENS_CONTEXT - 2000  # reserva para system + pregunta
+MAX_TOKENS_HISTORIAL = 32000 - MAX_TOKENS_CONTEXT - 2000  #keeps for system + questions
 
 client = OpenAI(api_key=OPENAI_API_KEY)
 
 def contar_tokens(messages, model="gpt-4-turbo"):
-    enc = tiktoken.encoding_for_model(model)
+    enc = tiktoken.encoding_for_model(model) #get the correct tokenizer for the model
     total = 0
     for m in messages:
-        total += 4  # tokens por role y delimitadores
-        total += len(enc.encode(m["content"]))
+        total += 4  #tokens per role, fixed number plus after depending the content
+        total += len(enc.encode(m["content"])) #tokenize the message content and count the number of tokens
     return total
 
 
-#Carga el índice y metadatos
+#Charge the index and metadata
 def cargar_index():
     index = faiss.read_index(INDEX_PATH)
-    with open(DOCS_PATH, "rb") as f:
-        docs = pickle.load(f)
+    with open(DOCS_PATH, "rb") as f: #with to close the file automatically
+        docs = pickle.load(f) #transform binary bytes into a python object
     return index, docs
 
-#Embedding de la pregunta
+#Query embedding
 def embed_query(query):
     query_limpia = limpiar_entrada(query)
-    emb = client.embeddings.create(input=query_limpia, model="text-embedding-3-small")
-    return np.array(emb.data[0].embedding, dtype="float32").reshape(1, -1)
+    emb = client.embeddings.create(input=query_limpia, model="text-embedding-3-small") #API answer
 
+    #fais needs float32
+    return np.array(emb.data[0].embedding, dtype="float32").reshape(1, -1) #reshape because fais expects (n_queries, dim_embedding)
+    #1 because theres only 1 embedding and -1 to calculate the dimension automatically
 
 #Busca documentos más similares
 def buscar_documentos(query, index, docs, max_tokens=MAX_TOKENS_CONTEXT, prev_docs=[]):
@@ -56,15 +59,16 @@ def buscar_documentos(query, index, docs, max_tokens=MAX_TOKENS_CONTEXT, prev_do
     def doc_id(doc):
         return f"{doc.get('title', '')}_{doc.get('year_of_publication', '')}".strip().lower()
 
-    vec = embed_query(query)
-    dists, indices = index.search(vec, len(docs))
-    resultados = [docs[i] for i in indices[0] if i < len(docs)]
+    vec = embed_query(query) #transform the query into a vector
+    dists, indices = index.search(vec, len(docs)) #we get the distance (how similar they are) and the index, we pass our vector and the documents order by similitude
+    resultados = [docs[i] for i in indices[0] if i < len(docs)] #with index gets the index of Faiss, with docs use the index to get the document
+    #and len to check if the index exists and do go out from the list
 
     usados = set(doc_id(d) for d in prev_docs)
     docs_en_contexto = []
     contexto = ""
 
-    #Primero añade documentos anteriores si caben
+    #First add the previous documents if exist
     for doc in prev_docs:
         resumen = construir_resumen(doc)
         if len(contexto + resumen) < max_tokens:
@@ -73,7 +77,7 @@ def buscar_documentos(query, index, docs, max_tokens=MAX_TOKENS_CONTEXT, prev_do
         else:
             break
 
-    #Luego añade nuevos documentos
+    #After add the new documents
     for doc in resultados:
         uid = doc_id(doc)
         if uid in usados:
@@ -88,12 +92,13 @@ def buscar_documentos(query, index, docs, max_tokens=MAX_TOKENS_CONTEXT, prev_do
 
     return docs_en_contexto
 
-#Limpia para evitar errores de codificación
+#Clean to avoid errors in the codification
 def limpiar_texto(texto):
-    return re.sub(r'[^\x00-\x7F]+', '', texto)
+    return re.sub(r'[^\x00-\x7F]+', '', texto) #avoid everything that is not ASCII
 
 def limpiar_entrada(texto):
     if isinstance(texto, str):
+        #we transform to bytes and to string again to delete bad characters
         return texto.encode("utf-8", "ignore").decode("utf-8", "ignore")
     return texto
 
@@ -157,7 +162,7 @@ def obtener_respuesta(query, contexto, historial):
     historial.append({"role": "system", "content": limpiar_entrada(prompt_instruccion)})
     historial.append({"role": "user", "content": query})
 
-    #Limita el historial para no pasarte del máximo
+    #Limit the history to dont overpass the max
     while contar_tokens(historial) > MAX_TOKENS_HISTORIAL and len(historial) > 2:
         historial.pop(1)
 
@@ -168,14 +173,65 @@ def obtener_respuesta(query, contexto, historial):
         temperature=0.7
     )
 
-    respuesta = response.choices[0].message.content.strip()
+    respuesta = response.choices[0].message.content.strip() #we get the first answer of the API
     historial.append({"role": "assistant", "content": respuesta})
     return respuesta
+
+# Cargar el índice una sola vez
+index, docs = cargar_index()
+print(f"Documentos cargados: {len(docs)}")
+
+# Historial por sesión
+historiales = {}
+docs_previos = {}
+
+def responder(question, session_id):
+    if session_id not in historiales:
+        historiales[session_id] = [
+            {
+                "role": "system",
+                "content": (
+                    "Eres un asistente académico experto. "
+                    "Analiza el contexto proporcionado, que incluye artículos científicos con título, autores, resumen, etc. "
+                    "Tu objetivo es responder en español exclusivamente en base al contenido de estos documentos, sin inventar. "
+                    "Cuando se haga una pregunta sobre un tema (como 'inteligencia artificial', 'educación', etc.), "
+                    "busca términos relacionados en los títulos y resúmenes y menciona los autores de los artículos que los tratan. "
+                    "Cuando se pregunte por un autor, identifica todos los artículos en el contexto en los que aparece, "
+                    "y lista los coautores únicos, sin limitarte solo al último documento mencionado. "
+                    "No asumas que las preguntas siempre se refieren al último documento. "
+                    "Si no hay información suficiente, responde claramente que no está disponible en el contexto."
+                )
+            }
+        ]
+        docs_previos[session_id] = []
+
+    historial = historiales[session_id]
+    prev_docs = docs_previos[session_id]
+
+    nuevos_docs = buscar_documentos(question, index, docs, prev_docs=prev_docs)
+
+    if not nuevos_docs:
+        return "No encontré documentos relevantes para eso."
+
+    vistos = set()
+    docs_actuales = []
+
+    for d in nuevos_docs + prev_docs:
+        uid = f"{d.get('title', '')}_{d.get('year_of_publication', '')}".strip().lower()
+        if uid not in vistos:
+            docs_actuales.append(d)
+            vistos.add(uid)
+
+    docs_previos[session_id] = docs_actuales
+
+    contexto = construir_contexto(docs_actuales)
+
+    return obtener_respuesta(question, contexto, historial)
 
 #Chat principal
 def chatbot():
     print("Asistente Académico con RAG - Escribe 'salir' para terminar.")
-    index, docs = cargar_index()
+    #index, docs = cargar_index()
 
     historial = [
         {
@@ -206,15 +262,15 @@ def chatbot():
             print("¡Hola! ¿En qué puedo ayudarte hoy?")
             continue
 
-        #Buscar documentos incluyendo los previos
+        #Search documents including the previous ones
         nuevos_docs = buscar_documentos(query, index, docs, prev_docs=docs_previos)
 
-        #Si no se encuentran documentos relevantes, evita generar respuesta
+        #Dont generate response if doesnt found relevant documents
         if not nuevos_docs:
             print("No encontré documentos relevantes para eso. ¿Podrías reformular o preguntar sobre otro tema?")
             continue
 
-        #Une sin duplicados
+        #Join without duplicated
         vistos = set()
         docs_previos = []
         for d in nuevos_docs + docs_previos:

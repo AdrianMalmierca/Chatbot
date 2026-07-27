@@ -1,13 +1,14 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
+from Ai import responder
 
 app = FastAPI()
 
 # Habilitar CORS para permitir peticiones desde Angular
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Puedes restringir esto a http://localhost:4200 si lo prefieres
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -15,12 +16,13 @@ app.add_middleware(
 
 # Modelo de datos para recibir mensajes
 class Message(BaseModel):
-    text: str
+    question: str
+    session_id: str
 
 @app.post("/chat")
 async def chat_response(message: Message):
-    response_text = f"Recibí tu mensaje: {message.text}"  # Aquí iría la lógica del chatbot
-    return {"response": response_text}
+    respuesta = responder(message.question, message.session_id)
+    return {"response": respuesta}
 
 if __name__ == "__main__":
     import uvicorn
