@@ -13,7 +13,10 @@ import { CommonModule } from '@angular/common';
 export class ChatComponent {
   question = '';
   loading = false;
+  showSlowWarning = false;
   error = '';
+
+  private slowWarningTimeout: ReturnType<typeof setTimeout> | null = null;
 
   messages: { sender: 'user' | 'bot'; text: string }[] = [];
 
@@ -25,18 +28,33 @@ export class ChatComponent {
 
     this.messages.push({ sender: 'user', text: content });
     this.loading = true;
+    this.showSlowWarning = false;
     this.error = '';
     this.question = '';
+
+    //if takes more than 10 seconds, the backend is waking up
+    this.slowWarningTimeout = setTimeout(() => {
+      this.showSlowWarning = true;
+    }, 10000);
 
     this.chatService.sendQuestion(content).subscribe({
       next: (res) => {
         this.messages.push({ sender: 'bot', text: res.response });
-        this.loading = false;
+        this.finishLoading();
       },
       error: () => {
         this.error = 'Error al contactar el servidor.';
-        this.loading = false;
+        this.finishLoading();
       },
     });
+  }
+
+  private finishLoading() {
+    this.loading = false;
+    this.showSlowWarning = false;
+    if (this.slowWarningTimeout) {
+      clearTimeout(this.slowWarningTimeout);
+      this.slowWarningTimeout = null;
+    }
   }
 }

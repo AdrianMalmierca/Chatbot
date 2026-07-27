@@ -83,3 +83,10 @@ button[disabled] {
   margin-top: 0.5rem;
   text-align: center;
 }
+
+.slow-warning {
+  margin-top: 0.4rem;
+  font-size: 0.8rem;
+  color: #777;
+  font-style: italic;
+}
