@@ -11,7 +11,8 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         "http://localhost:4200",
-        "https://chatbot-sigma-two-27.vercel.app/",
+        "https://chatbot-sigma-two-27.vercel.app",
+        "https://chatbot-git-main-adrians-projects-9d5c028d.vercel.app",
     ],
     allow_credentials=True,
     allow_methods=["*"],
