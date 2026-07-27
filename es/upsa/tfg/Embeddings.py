@@ -6,10 +6,11 @@ import os
 import pickle
 
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
-JSON_PATH = "/Users/administrador/Documents/Phyton/RagLlm/es/upsa/tfg/output_clean3.json"
-INDEX_PATH = "faiss_index.bin"
-DOCS_PATH = "doc_metadata.pkl"
-EMBEDDINGS_PATH = "embeddings.npy"
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+JSON_PATH = os.path.join(BASE_DIR, "output_clean3.json")
+INDEX_PATH = os.path.join(BASE_DIR, "faiss_index.bin")
+DOCS_PATH = os.path.join(BASE_DIR, "doc_metadata.pkl")
+EMBEDDINGS_PATH = os.path.join(BASE_DIR, "embeddings.npy")
 client = OpenAI(api_key=OPENAI_API_KEY)
 
 def cargar_json():

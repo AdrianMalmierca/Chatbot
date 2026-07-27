@@ -1,0 +1,7 @@
+fastapi
+uvicorn[standard]
+openai
+faiss-cpu
+numpy
+tiktoken
+pydantic

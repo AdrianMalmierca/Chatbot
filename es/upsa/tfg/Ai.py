@@ -7,8 +7,9 @@ import tiktoken
 import os
 
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
-INDEX_PATH = "/Users/administrador/Documents/Profesional/proyectos/RagLlmTodo/es/upsa/tfg/faiss_index.bin"
-DOCS_PATH = "/Users/administrador/Documents/Profesional/proyectos/RagLlmTodo/es/upsa/tfg/doc_metadata.pkl"
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+INDEX_PATH = os.path.join(BASE_DIR, "faiss_index.bin")
+DOCS_PATH = os.path.join(BASE_DIR, "doc_metadata.pkl")
 MAX_TOKENS_CONTEXT = 18000
 MAX_TOKENS_HISTORIAL = 32000 - MAX_TOKENS_CONTEXT - 2000  #keeps for system + questions
 
