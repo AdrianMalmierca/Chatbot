@@ -4,11 +4,9 @@
 # IDEs
 .idea/
 
-es/upsa/tfg/faiss_index.bin
 es/upsa/tfg/faiss_index.index
 es/upsa/tfg/vector_index.faiss
 es/upsa/tfg/vector_docs.json
-
 
 # Node/Angular
 node_modules/
@@ -17,8 +15,6 @@ dist/
 
 # Python
 __pycache__/
-*.pyc
-*.pkl
 *.npy
 
 # Environment files (secrets)
@@ -30,4 +26,3 @@ env/
 *.db
 
 frontend/.git
-
