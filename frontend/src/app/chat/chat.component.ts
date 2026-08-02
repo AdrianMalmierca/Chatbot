@@ -32,10 +32,10 @@ export class ChatComponent {
     this.error = '';
     this.question = '';
 
-    //if takes more than 10 seconds, the backend is waking up
+    //if takes more than 25 seconds, the backend is waking up
     this.slowWarningTimeout = setTimeout(() => {
       this.showSlowWarning = true;
-    }, 10000);
+    }, 25000);
 
     this.chatService.sendQuestion(content).subscribe({
       next: (res) => {
@@ -55,6 +55,13 @@ export class ChatComponent {
     if (this.slowWarningTimeout) {
       clearTimeout(this.slowWarningTimeout);
       this.slowWarningTimeout = null;
+    }
+  }
+
+  onKeydown(event: KeyboardEvent) {
+    if (event.key === 'Enter' && !event.shiftKey) {
+      event.preventDefault(); //avoids the \n of the textarea
+      this.send();
     }
   }
 }

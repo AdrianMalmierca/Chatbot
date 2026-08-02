@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
-from Ai import responder
+from pydantic import BaseModel, Field
+from Ai import responder, docs
 import os
 
 app = FastAPI()
@@ -19,15 +19,19 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Modelo de datos para recibir mensajes
+#Data model, we use basemodel to validate
 class Message(BaseModel):
-    question: str
-    session_id: str
+    question: str = Field(..., min_length=1, max_length=500) #... = compulsory
+    session_id: str = Field(..., min_length=1, max_length=100)
 
 @app.post("/chat")
 async def chat_response(message: Message):
     respuesta = responder(message.question, message.session_id)
     return {"response": respuesta}
+
+@app.get("/health")
+async def health_check():
+    return {"status": "ok", "documentos_cargados": len(docs)}
 
 if __name__ == "__main__":
     import uvicorn

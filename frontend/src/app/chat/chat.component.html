@@ -18,7 +18,7 @@
   </div>
 
   <div class="input-area">
-    <textarea [(ngModel)]="question" rows="2" placeholder="Escribe tu pregunta..."></textarea>
+    <textarea [(ngModel)]="question" (keydown)="onKeydown($event)" rows="2" placeholder="Escribe tu pregunta..."></textarea>
     <button (click)="send()" [disabled]="loading">Enviar</button>
   </div>
 

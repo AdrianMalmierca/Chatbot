@@ -25,4 +25,4 @@ env/
 *.sqlite
 *.db
 
-frontend/.git
+frontend/.gites/upsa/tfg/embeddings.npy
